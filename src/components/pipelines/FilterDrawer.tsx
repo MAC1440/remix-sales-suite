@@ -99,7 +99,7 @@ export function FilterDrawer({
   const clearAllFilters = () => {
     setFilterGroups([]);
     // addFilterGroup();
-    onApplyFilters("");
+    onApplyFilters("", 0);
   };
 
   const applyFilters = () => {
@@ -114,7 +114,7 @@ export function FilterDrawer({
 
     const filterString = buildPostgresQueryString(validGroups);
     console.log(filterString, validGroups);
-    onApplyFilters(filterString);
+    onApplyFilters(filterString, validGroups.length);
     // toast({
     //   title: "Filters applied",
     //   description: `Applied ${validGroups.length} filter rule(s)`,

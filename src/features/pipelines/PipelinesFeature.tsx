@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Search, Kanban, Table, BarChart3, Plus, Filter, X } from "lucide-react";
+import {
+  Search,
+  Kanban,
+  Table,
+  BarChart3,
+  Plus,
+  Filter,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +46,7 @@ export function PipelinesFeature() {
   const [opportunities, setOpportunities] = useState<IOpportunity[]>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [activeFilters, setActiveFilters] = useState("");
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -53,8 +62,8 @@ export function PipelinesFeature() {
   // API Calls
   const { data, isLoading, isFetching, isError, error } =
     useGetOpportunitiesQuery(queryString);
-  
-  const [createHandler , createStatus] = useCreateOpportunityMutation();
+
+  const [createHandler, createStatus] = useCreateOpportunityMutation();
 
   useEffect(() => {
     if (data?.data) {
@@ -91,17 +100,16 @@ export function PipelinesFeature() {
     console.log("🗑️ [API CALL] DELETE /api/opportunities/" + opportunityId);
   };
 
-  const onCreateOpportunityHandler = (
-    newOpportunity: OpportunityFormData
-  ) => {
-
-    createHandler(newOpportunity).unwrap().then((res)=>{
-      console.log("✅ [PIPELINES] Opportunity created successfully");
-      setIsCreateModalOpen(false);
-    }).catch((err)=>{
-      console.error("❌ [PIPELINES] Failed to create opportunity", err);
-    });
-
+  const onCreateOpportunityHandler = (newOpportunity: OpportunityFormData) => {
+    createHandler(newOpportunity)
+      .unwrap()
+      .then((res) => {
+        console.log("✅ [PIPELINES] Opportunity created successfully");
+        setIsCreateModalOpen(false);
+      })
+      .catch((err) => {
+        console.error("❌ [PIPELINES] Failed to create opportunity", err);
+      });
   };
 
   useEffect(() => {
@@ -121,11 +129,8 @@ export function PipelinesFeature() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 sm:mb-6">
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">
-                Opportunity Pipelines
+                Pipeline
               </h1>
-              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                Manage and track your sales opportunities
-              </p>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
@@ -166,28 +171,29 @@ export function PipelinesFeature() {
 
               <div className="flex items-center gap-2">
                 <Button
-                  variant={activeFilters.length > 0 ? "default" : "outline"}
+                  variant={activeFilterCount > 0 ? "default" : "outline"}
                   size="sm"
                   onClick={() => setIsFilterDrawerOpen(true)}
                   className="gap-2 relative shrink-0"
                 >
                   <Filter className="w-4 h-4" />
                   Filters
-                  {activeFilters.length > 0 && (
+                  {activeFilterCount > 0 && (
                     <Badge
                       variant="secondary"
                       className="ml-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
                     >
-                      {activeFilters.length}
+                      {activeFilterCount}
                     </Badge>
                   )}
                 </Button>
-                {activeFilters.length > 0 && (
+                {activeFilterCount > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => {
                       setActiveFilters("");
+                      setActiveFilterCount(0);
                       setCurrentPage(1);
                     }}
                     className="gap-1 shrink-0"
@@ -251,7 +257,7 @@ export function PipelinesFeature() {
           </div>
         ) : (
           // Main Content Area
-          <div className="flex-1 overflow-auto ">
+          <div className="flex-1 pe-5 ">
             {showAnalytics ? (
               <PipelineAnalytics
                 opportunities={opportunities as IOpportunity[]}
@@ -277,7 +283,10 @@ export function PipelinesFeature() {
         <FilterDrawer
           isOpen={isFilterDrawerOpen}
           onClose={() => setIsFilterDrawerOpen(false)}
-          onApplyFilters={setActiveFilters}
+          onApplyFilters={(filterString: string, count: number) => {
+            setActiveFilters(filterString);
+            setActiveFilterCount(count);
+          }}
           activeFilters={""}
         />
         <CreateOpportunityModal
